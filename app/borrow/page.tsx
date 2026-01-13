@@ -361,14 +361,14 @@ function BorrowContent() {
       <button
         type="button"
         onClick={() => setChatOpen((prev) => !prev)}
-        className="fixed bottom-6 left-6 z-30 flex items-center gap-3 rounded-[2px] border border-black bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em]"
+        className="fixed bottom-6 right-6 z-30 flex items-center gap-3 rounded-[2px] border border-black bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em]"
         aria-expanded={chatOpen}
       >
         {chatOpen ? "Close helper" : "Ask for help"}
       </button>
 
       <div
-        className={`fixed left-6 bottom-24 z-40 w-[340px] max-w-[calc(100vw-3rem)] rounded-[6px] border border-line bg-white p-4 transition-all duration-200 ${
+        className={`fixed right-6 bottom-24 z-40 w-[340px] max-w-[calc(100vw-3rem)] rounded-[6px] border border-line bg-white p-4 transition-all duration-200 ${
           chatOpen ? "opacity-100 translate-y-0" : "pointer-events-none opacity-0 translate-y-4"
         }`}
       >

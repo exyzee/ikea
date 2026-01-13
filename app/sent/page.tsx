@@ -34,6 +34,29 @@ function SentContent() {
   const [messageInput, setMessageInput] = useState("");
   const [threadMessages, setThreadMessages] = useState<Record<string, string[]>>({});
 
+  const seededConversations = [
+    {
+      id: "seed-jonas",
+      neighborId: "jonas",
+      neighborName: "Jonas",
+      neighborAvatar: "/images/avatars/jonas.jpg",
+      tools: ["Phillips screwdriver", "Level"],
+      windowText: "Today 18:30 • Return tomorrow morning",
+      status: "Approved for pickup",
+      note: "I can pick up at 18:30. Need the screwdriver + level."
+    },
+    {
+      id: "seed-sara",
+      neighborId: "sara",
+      neighborName: "Sara",
+      neighborAvatar: "/images/avatars/sara.jpg",
+      tools: ["Hammer"],
+      windowText: "Tomorrow 09:00 • Same day return",
+      status: "Awaiting approval",
+      note: "Is the hammer available tomorrow morning?"
+    }
+  ];
+
   const confirmationText = useMemo(() => {
     if (!tools.length) return "Request sent. Awaiting confirmation.";
     return `Request sent for: ${tools.join(", ")}. Awaiting confirmation.`;
@@ -43,7 +66,9 @@ function SentContent() {
     setStoredRequests(getStoredRequests());
   }, []);
 
-  const activeRequest = storedRequests.find((request) => request.id === activeRequestId) ?? storedRequests[0];
+  const conversations = storedRequests.length ? storedRequests : seededConversations;
+  const activeRequest =
+    conversations.find((request) => request.id === activeRequestId) ?? conversations[0];
 
   useEffect(() => {
     if (activeRequest && !activeRequestId) {
@@ -105,11 +130,11 @@ function SentContent() {
         </div>
       </Section>
 
-      <Section title="Recent requests" description="Select a request to view its conversation.">
-        {storedRequests.length ? (
+      <Section title="Inbox" description="Conversations with neighbors. Select a thread to view details.">
+        {conversations.length ? (
           <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
             <div className="divide-y divide-gray-200">
-              {storedRequests.map((request) => (
+              {conversations.map((request) => (
                 <button
                   type="button"
                   key={request.id}
@@ -151,6 +176,26 @@ function SentContent() {
                     <div>
                       <div className="text-sm font-semibold text-gray-900">{activeRequest.neighborName}</div>
                       <div className="text-xs text-gray-600">Conversation</div>
+                    </div>
+                  </div>
+                  <div className="grid gap-3 rounded-[6px] border border-line bg-gray-50 px-4 py-3 text-xs uppercase tracking-[0.18em] text-gray-600">
+                    <div className="flex flex-wrap items-center gap-3 text-gray-800">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">Status</span>
+                      <span className="rounded-[2px] border border-black px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-black">
+                        {("status" in activeRequest && activeRequest.status) ? activeRequest.status : "Pending response"}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 text-gray-800">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">Pickup</span>
+                      <span className="text-[11px]">{activeRequest.windowText ?? "Not set"}</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 text-gray-800">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">Tools</span>
+                      <div className="flex flex-wrap gap-2">
+                        {activeRequest.tools.map((tool) => (
+                          <ToolChip key={`${activeRequest.id}-detail-${tool}`} label={tool} />
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-3 text-sm">

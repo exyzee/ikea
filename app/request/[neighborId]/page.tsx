@@ -135,7 +135,7 @@ export default function RequestPage({ params }: { params: { neighborId: string }
         title="Message"
         description="Keep it concise: list the tools, pickup time, and return time."
         actions={
-          <Button variant="secondary" type="button" onClick={sendRequest}>
+          <Button variant="primary" type="button" onClick={sendRequest}>
             Send request
           </Button>
         }
@@ -193,9 +193,6 @@ export default function RequestPage({ params }: { params: { neighborId: string }
       </WarningCallout>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button variant="primary" type="button" onClick={sendRequest}>
-          Send request
-        </Button>
         <Button variant="secondary" href="/borrow">
           Back to Borrow
         </Button>

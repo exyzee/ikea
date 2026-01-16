@@ -14,7 +14,7 @@ export const products: Product[] = [
     requiredTools: ["Phillips screwdriver", "Hammer", "Allen key (5mm)"],
     optionalTools: ["Stud finder", "Level"],
     supportsWallMount: true,
-    imageUrl: "/images/products/billy-bookcase.jpg"
+    imageUrl: "https://www.ikea.com/us/en/images/products/billy-bookcase-white__0625599_pe692385_s5.jpg"
   },
   {
     id: "malm-chest",
@@ -22,7 +22,8 @@ export const products: Product[] = [
     requiredTools: ["Phillips screwdriver", "Hammer", "Allen key (4mm)"],
     optionalTools: ["Power drill", "Furniture strap kit"],
     supportsWallMount: true,
-    imageUrl: "/images/products/malm-chest.jpg"
+    imageUrl:
+      "https://www.ikea.com/images/natural-wood-dresser-with-a-lamp-and-plant-ontop-f5acdb03b9a4be501ab7f7d66187265a.jpg?f=sg"
   },
   {
     id: "lack-table",
@@ -30,7 +31,7 @@ export const products: Product[] = [
     requiredTools: ["Phillips screwdriver"],
     optionalTools: ["Power drill", "Furniture pads"],
     supportsWallMount: false,
-    imageUrl: "/images/products/lack-table.jpg"
+    imageUrl: "https://www.ikea.com/us/en/images/products/lack-coffee-table-black-brown__57540_pe163122_s5.jpg"
   },
   {
     id: "poang-chair",
@@ -38,7 +39,8 @@ export const products: Product[] = [
     requiredTools: ["Allen key (5mm)", "Small wrench"],
     optionalTools: ["Rubber mallet"],
     supportsWallMount: false,
-    imageUrl: "/images/products/poang-chair.jpg"
+    imageUrl:
+      "https://www.ikea.com/us/en/images/products/gryteryd-recliner-rocker-armchair-hakebo-beige__1440612_pe985904_s5.jpg?f=s"
   },
   {
     id: "pax-wardrobe",
@@ -46,6 +48,7 @@ export const products: Product[] = [
     requiredTools: ["Phillips screwdriver", "Hammer", "Allen key (5mm)", "Power drill with 3mm bit"],
     optionalTools: ["Level", "Stud finder", "Tape measure"],
     supportsWallMount: true,
-    imageUrl: "/images/products/pax-wardrobe.jpg"
+    imageUrl:
+      "https://www.ikea.com/images/organization-containers-in-a-shelving-unit-filled-with-folde-631569969c2a6a929a328f161e39b334.jpg?f=sg"
   }
 ];

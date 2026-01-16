@@ -80,6 +80,15 @@ h3 {
   animation-delay: 120ms;
 }
 
+.lift-hover {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.lift-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 15, 15, 0.08);
+}
+
 .panel-grid {
   background-image: linear-gradient(transparent 23px, rgba(15, 15, 15, 0.06) 24px),
     linear-gradient(90deg, transparent 23px, rgba(15, 15, 15, 0.06) 24px);

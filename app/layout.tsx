@@ -44,11 +44,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Link className="nav-link" href={`/guide/${defaultGuide}`}>
                   Guide
                 </Link>
-                <Link className="nav-link" href="/borrow">
-                  Borrow
-                </Link>
                 <Link className="nav-link" href="/sent">
-                  Requests Sent
+                  My Requests
                 </Link>
               </nav>
             </Container>

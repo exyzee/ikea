@@ -89,20 +89,12 @@ function SentContent() {
 
   return (
     <div className="space-y-10">
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center fade-in-up">
-        <div className="space-y-3">
-          <p className="text-xs font-medium uppercase tracking-[0.3em] text-gray-600">Requests</p>
-          <h1 className="text-4xl font-semibold text-gray-900">Request sent</h1>
-          <p className="text-sm text-gray-700 max-w-2xl">{confirmationText}</p>
-        </div>
-        <div className="relative overflow-hidden rounded-[6px] border border-line bg-white">
-          <img
-            src="/images/borrow-hero.jpg"
-            alt="Clean workspace"
-            className="h-44 w-full object-cover sm:h-56"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-white/20 to-transparent" />
-        </div>
+      <div className="space-y-3 fade-in-up">
+        <p className="text-xs font-medium uppercase tracking-[0.3em] text-gray-600">Requests</p>
+        <h1 className="text-4xl font-semibold text-gray-900">Requests sent</h1>
+        <p className="text-sm text-gray-700 max-w-2xl">
+          {confirmationText.replace("Request sent", "Requests sent")}
+        </p>
       </div>
 
       <Section

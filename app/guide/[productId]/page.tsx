@@ -37,13 +37,7 @@ export default function GuidePage({ params }: { params: { productId: string } })
   const [chatLoading, setChatLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState<
     Array<{ role: "user" | "assistant"; content: string; neighbors?: typeof neighbors }>
-  >([
-    {
-      role: "assistant",
-      content:
-        "Ask about your manual, missing tools, or who has a specific tool nearby. I’ll answer from the IKEA guide."
-    }
-  ]);
+  >([]);
 
   const allTools = useMemo(
     () => [...(product?.requiredTools ?? []), ...(product?.optionalTools ?? [])],
@@ -74,6 +68,33 @@ export default function GuidePage({ params }: { params: { productId: string } })
   }, [availableToday, missingTools, sort]);
 
   const allNeighborTools = useMemo(() => neighbors.flatMap((neighbor) => neighbor.tools), []);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("guide-chat-history");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setChatMessages(parsed);
+          return;
+        }
+      } catch {
+        // ignore invalid cache
+      }
+    }
+    setChatMessages([
+      {
+        role: "assistant",
+        content:
+          "Ask about your manual, missing tools, or who has a specific tool nearby. I’ll answer from the IKEA guide."
+      }
+    ]);
+  }, []);
+
+  useEffect(() => {
+    if (!chatMessages.length) return;
+    window.localStorage.setItem("guide-chat-history", JSON.stringify(chatMessages));
+  }, [chatMessages]);
 
   if (!product) {
     return (
@@ -175,20 +196,22 @@ export default function GuidePage({ params }: { params: { productId: string } })
       const neighborQuery = /nearby|nearest|closest|neighbors|neighbour|near me|who is near|who's near/i.test(
         question
       );
-      if (neighborQuery) {
-        const tokens = question
+      const tokens = question
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter(Boolean);
+      const toolMatch = allNeighborTools.find((tool) => {
+        const toolTokens = tool
           .toLowerCase()
           .replace(/[^a-z0-9\s]/g, " ")
           .split(/\s+/)
           .filter(Boolean);
-        const toolMatch = allNeighborTools.find((tool) => {
-          const toolTokens = tool
-            .toLowerCase()
-            .replace(/[^a-z0-9\s]/g, " ")
-            .split(/\s+/)
-            .filter(Boolean);
-          return toolTokens.some((token) => token.length > 2 && tokens.includes(token));
-        });
+        return toolTokens.some((token) => token.length > 2 && tokens.includes(token));
+      });
+      const whoHasQuery = /who has|who's got|anyone with|anyone have|can lend/i.test(question);
+
+      if (neighborQuery || (toolMatch && whoHasQuery)) {
         const filtered = toolMatch
           ? neighbors.filter((neighbor) =>
               neighbor.tools.some((tool) => tool.toLowerCase() === toolMatch.toLowerCase())
@@ -501,23 +524,65 @@ export default function GuidePage({ params }: { params: { productId: string } })
           </Section>
         </div>
 
-        <aside className="rounded-[6px] border border-line bg-white p-4 panel-grid lg:sticky lg:top-6">
+        <aside className="rounded-[6px] border border-line bg-white p-4 lg:sticky lg:top-6">
           <div className="space-y-3">
             <div className="text-xs font-medium uppercase tracking-[0.2em] text-gray-600">Guidance</div>
             {loadingGuidance ? <p className="text-sm text-gray-700">Updating guidance…</p> : null}
             <div className="space-y-2 text-sm text-gray-800 leading-relaxed">
-              {guidance
-                .split("\n")
-                .filter((line) => line.trim().length > 0)
-                .map((line, idx) =>
-                  line.startsWith("- ") ? (
-                    <ul key={idx} className="list-disc pl-5">
-                      <li>{line.replace("- ", "")}</li>
-                    </ul>
-                  ) : (
-                    <p key={idx}>{line}</p>
-                  )
-                )}
+              {(() => {
+                const lines = guidance.split("\n");
+                const blocks: Array<{ type: "p" | "ul"; content: string[] }> = [];
+                let currentList: string[] = [];
+
+                const pushList = () => {
+                  if (currentList.length) {
+                    blocks.push({ type: "ul", content: currentList });
+                    currentList = [];
+                  }
+                };
+
+                lines.forEach((raw) => {
+                  const line = raw.trim();
+                  if (!line) {
+                    pushList();
+                    return;
+                  }
+                  if (line.startsWith("- ")) {
+                    currentList.push(line.replace("- ", ""));
+                    return;
+                  }
+                  pushList();
+                  blocks.push({ type: "p", content: [line] });
+                });
+                pushList();
+
+                return blocks.map((block, idx) => {
+                  if (block.type === "ul") {
+                    return (
+                      <ul key={`ul-${idx}`} className="list-disc pl-5 space-y-1">
+                        {block.content.map((item, itemIdx) => (
+                          <li
+                            key={`li-${idx}-${itemIdx}`}
+                            dangerouslySetInnerHTML={{
+                              __html: item.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+                            }}
+                          />
+                        ))}
+                      </ul>
+                    );
+                  }
+
+                  const paragraph = block.content.join(" ");
+                  return (
+                    <p
+                      key={`p-${idx}`}
+                      dangerouslySetInnerHTML={{
+                        __html: paragraph.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+                      }}
+                    />
+                  );
+                });
+              })()}
             </div>
           </div>
         </aside>

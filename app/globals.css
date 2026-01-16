@@ -89,13 +89,6 @@ h3 {
   box-shadow: 0 6px 16px rgba(15, 15, 15, 0.08);
 }
 
-.panel-grid {
-  background-image: linear-gradient(transparent 23px, rgba(15, 15, 15, 0.06) 24px),
-    linear-gradient(90deg, transparent 23px, rgba(15, 15, 15, 0.06) 24px);
-  background-size: 24px 24px;
-  background-position: -1px -1px;
-}
-
 .soft-shadow {
   box-shadow: 0 1px 0 rgba(15, 15, 15, 0.04);
 }

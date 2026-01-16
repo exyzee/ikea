@@ -23,13 +23,18 @@ async function generateWithGemini({
   needsMounting: boolean;
   toolsUserHas: string[];
 }) {
-  const system = `You are an IKEA-style assembly assistant. Answer calmly and concisely using ONLY the retrieved notes. Safety first. If information is missing, say what is missing. Do not add tools or steps not present in sources. End with citations like [file > heading].`;
+  const system =
+    "You are an IKEA-style assembly assistant. Answer calmly and concisely using ONLY the retrieved notes. " +
+    "Safety first. If information is missing, say what is missing. " +
+    "Format as short paragraphs or bullet points with clear labels. " +
+    "Never mention neighbors unless explicitly asked. " +
+    "Do not add tools or steps not present in sources. End with citations like [file > heading].";
 
   const retrievedText = chunks
     .map((chunk) => `Source: ${chunk.source} > ${chunk.heading}\n${chunk.content}`)
     .join("\n\n");
 
-  const prompt = `${system}\n\nRetrieved:\n${retrievedText}\n\nContext: wallType=${wallType}, needsMounting=${needsMounting}, userHas=${toolsUserHas.join(", ")}\nQuestion: ${question}\n\nAnswer:`;
+  const prompt = `Retrieved notes:\n${retrievedText}\n\nContext: wallType=${wallType}, needsMounting=${needsMounting}, userHas=${toolsUserHas.join(", ")}\nQuestion: ${question}\n\nAnswer:`;
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -57,13 +62,41 @@ async function generateWithGemini({
   return String(text).trim();
 }
 
-function buildMockAnswer(chunks: ReturnType<typeof retrieveChunks>) {
-  if (!chunks.length) return "No guidance available yet.";
-  const lines = chunks.map((chunk) => `- ${chunk.content}`);
-  const citations = formatCitations(chunks)
-    .map((label) => `[${label}]`)
-    .join(" ");
-  return `${lines.join("\n")}\n\n${citations}`;
+function buildMockAnswer(chunks: ReturnType<typeof retrieveChunks>, question: string) {
+  if (!chunks.length) return "I don’t have enough manual details to answer that yet.";
+
+  const pickByHeading = (keyword: RegExp) =>
+    chunks.find((chunk) => keyword.test(chunk.heading)) ?? chunks.find((chunk) => keyword.test(chunk.content));
+
+  const safety = pickByHeading(/safety/i);
+  const steps = pickByHeading(/steps|assembly/i);
+  const tools = pickByHeading(/tools|tool reasons/i);
+  const mounting = pickByHeading(/mounting/i);
+
+  const parts: string[] = [];
+  const lowerQ = question.toLowerCase();
+
+  if (lowerQ.includes("why") && tools) {
+    parts.push(`From the manual: ${tools.content}`);
+  } else if (steps) {
+    parts.push(`Here’s the next best step from the manual: ${steps.content}`);
+  } else if (tools) {
+    parts.push(`Tools guidance: ${tools.content}`);
+  }
+
+  if (lowerQ.includes("mount") && mounting) {
+    parts.push(`Mounting note: ${mounting.content}`);
+  }
+
+  if (safety) {
+    parts.push(`Safety first: ${safety.content}`);
+  }
+
+  if (!parts.length) {
+    parts.push(`Manual reference: ${chunks[0].content}`);
+  }
+
+  return parts.join("\n\n");
 }
 
 export async function POST(request: Request) {
@@ -81,7 +114,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "productId and question are required" }, { status: 400 });
     }
 
-    const chunks = retrieveChunks(productId, question, `${wallType ?? ""} ${needsMounting ?? false} ${(toolsUserHas ?? []).join(" ")}`);
+    const chunks = retrieveChunks(
+      productId,
+      question,
+      `${wallType ?? ""} ${needsMounting ?? false} ${(toolsUserHas ?? []).join(" ")}`
+    );
     const apiKey = process.env.GROQ_API_KEY;
     let answer: string;
 
@@ -97,10 +134,10 @@ export async function POST(request: Request) {
         });
       } catch (geminiError) {
         console.error("Gemini fallback to local RAG", geminiError);
-        answer = buildMockAnswer(chunks);
+        answer = buildMockAnswer(chunks, question);
       }
     } else {
-      answer = buildMockAnswer(chunks);
+      answer = buildMockAnswer(chunks, question);
     }
 
     const citations = formatCitations(chunks);

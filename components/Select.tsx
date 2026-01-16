@@ -69,7 +69,7 @@ export function Select({ label, options, value, onChangeValue, className, placeh
                   }}
                   className={cn(
                     "flex w-full items-center justify-between px-3 py-2 text-left transition-colors",
-                    active ? "bg-black text-white" : "hover:bg-gray-50"
+                    active ? "bg-[#f1efe9] text-gray-900" : "hover:bg-gray-50"
                   )}
                 >
                   <span>{option.label}</span>
